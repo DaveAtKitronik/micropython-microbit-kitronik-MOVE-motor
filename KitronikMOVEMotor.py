@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from microbit import i2c, pin3, pin12, display, sleep
+from microbit import i2c, pin3, pin12, pin15, pin16, display, sleep
 import math
 from neopixel import NeoPixel
 
@@ -240,6 +240,11 @@ class MOVEMotor:
         if(period >SERVO_MAX_PULSE):
             period =SERVO_MAX_PULSE
         duty= round(period*1024*50//1000000) #1024-steps in analog, 50Hz frequency, // to convert to uS
-        pin15.write_analog(duty)
+        if(servo == 1)
+            pin15.write_analog(duty)
+        elif (servo == 2)
+            pin16.write_analog(duty)
+        else #shoudl never get here...
+            raise Exception("INVALID SERVO:",servo," specified, should be 1 or 2") #harsh but informative
         
         
