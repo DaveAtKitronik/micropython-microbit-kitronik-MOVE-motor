@@ -38,6 +38,13 @@ MOTOR_OUT_VALUE = 0xAA  #Outputs set to be controled PWM registers
 LEFT_MOTOR = 0x04
 RIGHT_MOTOR = 0x02
 
+# Servo Constants
+SERVO_MIN_PULSE = 500 #microsec
+SERVO_MAX_PULSE = 2500 #microsec
+SERVO_DEGREE_RANGE = 180
+SERVO_DEG_TO_uS = (SERVO_MAX_PULSE-SERVO_MIN_PULSE)/SERVO_DEGREE_RANGE
+SERVO_PWM_PERIOD = 20 #ms
+
 class MOVEMotor:
 
     #An initialisation function to setup the PCA chip correctly
@@ -85,6 +92,11 @@ class MOVEMotor:
                 i2c.write(CHIP_ADDR,buffer,False)
             except OSError:
                 raise OSError("Check the Micro:bit is turned on!")
+                #now setup PWM on the servo pins, and set the servos to 90 degrees
+        pin15.set_analog_period(SERVO_PWM_PERIOD)
+        pin16.set_analog_period(SERVO_PWM_PERIOD)
+        self.goToPosition(1,90)
+        self.goToPosition(2,90)
 
     #A couple of 'raw' speed functions for the motors.
     # these functions expect speed -255 -> +255
@@ -212,3 +224,22 @@ class MOVEMotor:
             self.ws2811[0] = (0, 0, 255)
             self.ws2811[1] = (0, 0, 255)
             self.ws2811.show()
+       #Servo Control
+    # servo is expected to be 1 or 2, as per the silk on the buggy.
+    #Servos are on Pins 15 and 16. We write an analog to them.
+    #goToPosition converts degrees to microseconds and calls gotoPeriod, 
+    def goToPosition(self,servo, degrees):
+        period = SERVO_MIN_PULSE + (SERVO_DEG_TO_uS * degrees)
+        self.goToPeriod(servo,period)
+        
+    def goToPeriod(self,servo, period):
+        if(servo < 1) or (servo > 2):
+            raise Exception("INVALID SERVO:",servo," specified, should be 1 or 2") #harsh but informative
+        if(period < SERVO_MIN_PULSE):
+            period = SERVO_MIN_PULSE
+        if(period >SERVO_MAX_PULSE):
+            period =SERVO_MAX_PULSE
+        duty= round(period*1024*50//1000000) #1024-steps in analog, 50Hz frequency, // to convert to uS
+        pin15.write_analog(duty)
+        
+        
