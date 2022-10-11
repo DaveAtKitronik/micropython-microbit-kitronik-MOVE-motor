@@ -240,11 +240,11 @@ class MOVEMotor:
         if(period >SERVO_MAX_PULSE):
             period =SERVO_MAX_PULSE
         duty= round(period*1024*50//1000000) #1024-steps in analog, 50Hz frequency, // to convert to uS
-        if(servo == 1)
+        if(servo == 1):
             pin15.write_analog(duty)
-        elif (servo == 2)
+        elif (servo == 2):
             pin16.write_analog(duty)
-        else #shoudl never get here...
+        else: #should never get here...
             raise Exception("INVALID SERVO:",servo," specified, should be 1 or 2") #harsh but informative
         
         
